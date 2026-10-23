@@ -137,10 +137,14 @@ with left:
         m = events.copy()
         m["ประเภท"] = m["category"].map(CATEGORY_LABEL).fillna(m["category"])
         m["แหล่ง"] = m["sources"].apply(lambda s: ", ".join(SOURCE_LABEL.get(x, x) for x in s))
-        fig = px.scatter_mapbox(m, lat="lat", lon="lon", color="ประเภท", size=m["n_sources"] * 4, size_max=14,
-                                hover_name="title", hover_data={"แหล่ง": True, "lat": False, "lon": False},
+        m["_size"] = m["n_sources"] * 4
+        # แผนที่ OpenStreetMap ไม่ต้องใช้ API key (แผนที่ของ CARTO ต้องใช้ key แล้ว)
+        fig = px.scatter_mapbox(m, lat="lat", lon="lon", color="ประเภท", size="_size", size_max=14,
+                                hover_name="title",
+                                hover_data={"แหล่ง": True, "ประเภท": True, "_size": False, "lat": False, "lon": False},
                                 color_discrete_map={CATEGORY_LABEL[k]: v for k, v in CATEGORY_COLOR.items()},
-                                mapbox_style="carto-positron", zoom=10, center={"lat": 13.75, "lon": 100.56})
+                                mapbox_style="open-street-map", zoom=10.5, center={"lat": 13.75, "lon": 100.55},
+                                opacity=0.85)
         fig.update_layout(height=430, margin=dict(l=0, r=0, t=10, b=0))
         st.plotly_chart(fig, use_container_width=True)
     else:
