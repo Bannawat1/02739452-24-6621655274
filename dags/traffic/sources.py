@@ -221,9 +221,10 @@ def parse_longdo(e):
 # ---------------- 3) Traffy Fondue (เรื่องร้องเรียนของ กทม.) ----------------
 TRAFFY_URL = "https://publicapi.traffy.in.th/share/teamchadchart/search"
 TRAFFY_LIMIT = int(os.getenv("TRAFFY_LIMIT", "500"))
-# ประเภทปัญหาที่เกี่ยวกับการจราจรบนถนน -> หมวดกลาง
-_TRAFFY_TYPES = {"ถนน": "road", "จราจร": "traffic", "น้ำท่วม": "flood", "สะพาน": "road", "ทางเท้า": "road"}
-_TRAFFY_KEYWORDS = {"รถติด": "traffic", "จราจร": "traffic", "น้ำท่วม": "flood", "ถนน": "road"}
+# ประเภทปัญหาที่ส่งผลต่อการจราจรบนถนน -> หมวดกลาง (ไม่รวมทางเท้า เพราะไม่กระทบรถ)
+_TRAFFY_TYPES = {"จราจร": "traffic", "ถนน": "road", "น้ำท่วม": "flood", "สะพาน": "road"}
+# ใช้เมื่อเรื่องไม่มีประเภท ห้ามใช้คำว่า "ถนน" เพราะข้อความของ Traffy มีบรรทัด "ถนน: <ชื่อถนน>" ระบุที่อยู่แทบทุกเรื่อง
+_TRAFFY_KEYWORDS = {"รถติด": "traffic", "การจราจร": "traffic", "น้ำท่วม": "flood"}
 
 
 def _traffy_category(item):

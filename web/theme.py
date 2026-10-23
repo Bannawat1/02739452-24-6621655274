@@ -52,7 +52,9 @@ h3 {{ font-size: 20px !important; font-weight: 500 !important; padding-top: .4re
 
 /* KPI: การ์ดแบนบนพื้นเทา ไม่มีเงา มุม 8px */
 [data-testid="stMetric"] {{ background: {CHROME}; border-radius: 8px; padding: 16px 20px; }}
-[data-testid="stMetricLabel"] p {{ color: {INK_META}; font-size: 14px; font-weight: 400; }}
+[data-testid="stMetricLabel"] p {{ color: {INK_META}; font-size: 14px; font-weight: 400; white-space: normal; }}
+[data-testid="stMetricLabel"] div {{ overflow: visible; }}
+[data-testid="stMetricDelta"] div {{ white-space: normal; }}
 [data-testid="stMetricValue"] {{ color: {INK}; font-size: 30px; font-weight: 700; }}
 
 /* กรอบกราฟ 12px */
