@@ -1,10 +1,10 @@
-# โทนสีตาม DESIGN-sap.md: พื้นขาว, chrome เทาอ่อน, น้ำเงินเป็นสีเน้นสีเดียว
+# โทนสีตาม DESIGN.md "WattVision": โหมดมืด สีเน้นฟ้านีออน
 [theme]
-base = "light"
-primaryColor = "#0057d2"
-backgroundColor = "#ffffff"
-secondaryBackgroundColor = "#f5f6f7"
-textColor = "#223548"
+base = "dark"
+primaryColor = "#00E5FF"
+backgroundColor = "#121212"
+secondaryBackgroundColor = "#1E1E1E"
+textColor = "#FFFFFF"
 font = "sans serif"
 
 [client]

@@ -6,13 +6,11 @@ import plotly.express as px
 import streamlit as st
 
 from db import query
-from theme import CATEGORY_COLOR, INK_META, PRIMARY, SKY, SOURCE_COLOR, apply_theme, band, hero
+from theme import (BORDER, CHART_CONFIG, CATEGORY_COLOR, CYAN, GREEN, HEAT_SCALE, SOURCE_COLOR, TEXT2, alert_panel, apply_theme,
+                   band, hero)
 
-st.set_page_config(page_title="Bangkok Traffic", page_icon="🚦", layout="wide")
+st.set_page_config(page_title="Bangkok Traffic", page_icon="⚡", layout="wide")
 apply_theme()
-hero("Bangkok Traffic Density", "ความหนาแน่นการจราจรกรุงเทพฯ",
-     "ระดับรถติด (%) = เวลาเดินทางที่เพิ่มขึ้นเมื่อเทียบกับตอนถนนโล่ง จาก TomTom Traffic Index (web scraping) "
-     "พร้อมเหตุการณ์ที่ส่งผลต่อการจราจรจาก Longdo Traffic และ Traffy Fondue · อัปเดตด้วย Apache Airflow ทุก 15 นาที")
 
 SOURCE_LABEL = {"tomtom_index": "TomTom Traffic Index", "longdo": "Longdo Traffic", "traffy": "Traffy Fondue"}
 CATEGORY_LABEL = {"traffic": "การจราจรติดขัด", "accident": "อุบัติเหตุ", "closure": "ปิดถนน",
@@ -77,83 +75,110 @@ if search:
                       | records["area"].str.contains(search, case=False, na=False)]
     events = events[events["title"].str.contains(search, case=False, na=False)]
 
-# ---------------- KPI: ความหนาแน่น ----------------
+# ---------------- ส่วนหัว ----------------
+last = query("SELECT MAX(last_seen) AS t FROM traffic_record")["t"].iloc[0]
+last_txt = pd.to_datetime(last, utc=True).tz_convert("Asia/Bangkok").strftime("%d/%m %H:%M") if last is not None else "-"
+hero("Bangkok Traffic Density", "ความหนาแน่นการจราจรกรุงเทพฯ",
+     "ระดับรถติด (%) = เวลาเดินทางที่เพิ่มขึ้นเมื่อเทียบกับตอนถนนโล่ง จาก TomTom Traffic Index (web scraping) "
+     "พร้อมเหตุการณ์ที่ส่งผลต่อการจราจรจาก Longdo Traffic และ Traffy Fondue · อัปเดตด้วย Apache Airflow ทุก 15 นาที",
+     live=f"อัปเดตล่าสุด {last_txt}")
+
+# ---------------- KPI (3 ช่อง) ----------------
 base = pick("base")
 now_row = wh[(wh["day"] == DAYS_EN[now.weekday()]) & (wh["hour"] == now.hour)] if len(wh) else wh
 worst = wh.loc[wh["c"].idxmax()] if len(wh) else None
-k = st.columns(5)
-k[0].metric(f"ตอนนี้ ({DAYS_TH[now.weekday()]} {now:%H}:00)",
+k = st.columns(3)
+k[0].metric(f"รถติดตอนนี้ · {DAYS_TH[now.weekday()]} {now:%H}:00",
             f"{now_row['c'].iloc[0]:.0f}%" if len(now_row) else "-",
-            f"{now_row['v'].iloc[0]:.0f} กม./ชม." if len(now_row) else None, delta_color="off")
-k[1].metric("รถติดเฉลี่ยทั้งปี", f"{base['c']:.0f}%" if base is not None else "-",
-            f"{base['v']:.0f}/{base['fv']:.0f} กม./ชม." if base is not None else None, delta_color="off")
-k[2].metric("ชั่วโมงที่ติดที่สุด", f"{worst['c']:.0f}%" if worst is not None else "-",
-            f"{DAYS_TH[DAYS_EN.index(worst['day'])]} {worst['hour']:02d}:00" if worst is not None else None,
+            (f"ความเร็ว {now_row['v'].iloc[0]:.0f} กม./ชม."
+             + (f" · เฉลี่ยทั้งปี {base['c']:.0f}%" if base is not None else "")) if len(now_row) else None,
             delta_color="off")
-k[3].metric(f"เหตุการณ์ {days} วัน", f"{len(events):,}")
-k[4].metric("ข้อมูลสะสมทั้งหมด", f"{total:,}")
+k[1].metric("ชั่วโมงที่ติดที่สุดของสัปดาห์", f"{worst['c']:.0f}%" if worst is not None else "-",
+            f"{DAYS_TH[DAYS_EN.index(worst['day'])]} {worst['hour']:02d}:00 · ความเร็ว {worst['v']:.0f} กม./ชม."
+            if worst is not None else None, delta_color="off")
+k[2].metric(f"เหตุการณ์กระทบการจราจร · {days} วัน", f"{len(events):,}",
+            f"รายงานตรงกันหลายแหล่ง {(events['n_sources'] > 1).sum():,} · ข้อมูลสะสม {total:,} รายการ",
+            delta_color="off")
 
-# ---------------- ความหนาแน่นตามเวลา ----------------
-band(f"ระดับความหนาแน่นการจราจรของกรุงเทพฯ ตามวันและเวลา (ค่าเฉลี่ยทั้งปีจาก TomTom Traffic Index · ขอบเขต {scope})")
-left, right = st.columns([3, 2])
+# ---------------- กราฟหลัก (8) + แผงแจ้งเตือน (4) ----------------
+band(f"ค่าเฉลี่ยทั้งปีจาก TomTom Traffic Index · ขอบเขต {scope}", "ความหนาแน่นตามวันและเวลา")
+left, right = st.columns([2, 1])
 with left:
-    st.subheader("รถติดช่วงไหนของสัปดาห์")
     if len(wh):
         pivot = wh.pivot_table(index="day", columns="hour", values="c", aggfunc="mean").reindex(index=DAYS_EN,
                                                                                                columns=range(24))
         pivot.index = DAYS_TH
-        fig = px.imshow(pivot, color_continuous_scale="RdYlGn_r", aspect="auto",
+        fig = px.imshow(pivot, color_continuous_scale=HEAT_SCALE, aspect="auto",
                         labels={"x": "ชั่วโมง", "y": "", "color": "รถติด %"})
-        fig.update_layout(height=360, margin=dict(l=0, r=0, t=10, b=0))
-        st.plotly_chart(fig, use_container_width=True)
+        fig.update_traces(xgap=2, ygap=2, hovertemplate="%{y} %{x}:00<br>รถติด %{z:.0f}%<extra></extra>")
+        fig.update_layout(height=400, margin=dict(l=8, r=8, t=16, b=8), xaxis=dict(dtick=2, showgrid=False),
+                          yaxis=dict(showgrid=False))
+        st.plotly_chart(fig, use_container_width=True, config=CHART_CONFIG)
+    else:
+        st.info("ยังไม่มีข้อมูลจาก TomTom")
 with right:
-    st.subheader(f"วัน{DAYS_TH[day]}: ความหนาแน่นรายชั่วโมง")
+    latest = events.sort_values("first_time", ascending=False).head(6)
+    items = []
+    for _, e in latest.iterrows():
+        t = pd.to_datetime(e["first_time"], utc=True).tz_convert("Asia/Bangkok")
+        src = " + ".join(SOURCE_LABEL.get(x, x).split()[0] for x in e["sources"])
+        items.append((e["category"], e["title"], CATEGORY_LABEL.get(e["category"], e["category"]),
+                      f"{t:%d/%m %H:%M} · {src}"))
+    alert_panel("⚠ เหตุการณ์ล่าสุด", items, f"{len(events)} รายการ")
+
+# ---------------- ความหนาแน่นรายชั่วโมง (area) + รายเดือน ----------------
+band("ระดับรถติดเทียบกับความเร็วจริงและความเร็วตอนถนนโล่ง", f"วัน{DAYS_TH[day]}: ความหนาแน่นรายชั่วโมง")
+left, right = st.columns([2, 1])
+with left:
     d = wh[wh["day"] == DAYS_EN[day]].sort_values("hour")
     if len(d):
         fig = go.Figure()
-        fig.add_bar(x=d["hour"], y=d["c"], name="รถติด %", marker_color=PRIMARY, yaxis="y")
-        fig.add_scatter(x=d["hour"], y=d["v"], name="ความเร็วจริง", mode="lines", line=dict(color=INK_META), yaxis="y2")
+        fig.add_scatter(x=d["hour"], y=d["c"], name="รถติด %", mode="lines", line=dict(color=CYAN, width=3,
+                        shape="spline"), fill="tozeroy", fillcolor="rgba(0,229,255,0.14)", yaxis="y")
+        fig.add_scatter(x=d["hour"], y=d["v"], name="ความเร็วจริง", mode="lines",
+                        line=dict(color=GREEN, width=2, shape="spline"), yaxis="y2")
         fig.add_scatter(x=d["hour"], y=d["fv"], name="ความเร็วตอนถนนโล่ง", mode="lines",
-                        line=dict(color=SKY, dash="dash"), yaxis="y2")
-        fig.update_layout(height=360, margin=dict(l=0, r=0, t=10, b=40), legend=dict(orientation="h", y=-0.22),
-                          xaxis=dict(title="ชั่วโมง", dtick=3), yaxis=dict(title="รถติด %"),
+                        line=dict(color=TEXT2, width=1.5, dash="dot"), yaxis="y2")
+        fig.update_layout(height=340, margin=dict(l=8, r=8, t=16, b=8), hovermode="x unified",
+                          legend=dict(orientation="h", y=1.12, x=0),
+                          xaxis=dict(title="ชั่วโมง", dtick=2, showgrid=False), yaxis=dict(title="รถติด %"),
                           yaxis2=dict(title="กม./ชม.", overlaying="y", side="right", showgrid=False))
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, use_container_width=True, config=CHART_CONFIG)
+with right:
+    mo = congestion[congestion["category"] == "monthly"].sort_values("period")
+    if len(mo):
+        fig = go.Figure(go.Scatter(x=mo["period"], y=mo["c"], mode="lines+markers", fill="tozeroy",
+                                   line=dict(color=CYAN, width=2), fillcolor="rgba(0,229,255,0.10)",
+                                   marker=dict(size=6, color=CYAN), hovertemplate="%{x}<br>%{y:.0f}%<extra></extra>"))
+        fig.update_layout(height=340, margin=dict(l=8, r=8, t=40, b=8), showlegend=False,
+                          title=dict(text="เฉลี่ยรายเดือน (%)", font=dict(size=14, color=TEXT2), x=0.02),
+                          xaxis=dict(showgrid=False, tickangle=-45))
+        st.plotly_chart(fig, use_container_width=True, config=CHART_CONFIG)
 
-mo = congestion[congestion["category"] == "monthly"].sort_values("period")
-if len(mo):
-    st.subheader("ความหนาแน่นเฉลี่ยรายเดือน")
-    fig = px.line(mo, x="period", y="c", markers=True, labels={"period": "เดือน", "c": "รถติด %"})
-    fig.update_traces(line_color=SOURCE_COLOR["tomtom_index"])
-    fig.update_layout(height=260, margin=dict(l=0, r=0, t=10, b=0))
-    st.plotly_chart(fig, use_container_width=True)
-
-# ---------------- เหตุการณ์ที่ส่งผลต่อความหนาแน่น ----------------
-band(f"เหตุการณ์ที่ส่งผลต่อความหนาแน่นการจราจร {days} วันล่าสุด (Longdo Traffic + Traffy Fondue ตัดรายการซ้ำข้ามแหล่งแล้ว)")
-left, right = st.columns([3, 2])
+# ---------------- แผนที่ (8) + ประเภท (4) ----------------
+band(f"{days} วันล่าสุด · Longdo Traffic + Traffy Fondue ตัดรายการซ้ำข้ามแหล่งแล้ว", "เหตุการณ์ที่ส่งผลต่อการจราจร")
+left, right = st.columns([2, 1])
 with left:
-    st.subheader("จุดที่มีเหตุการณ์กระทบการจราจร")
     if len(events):
         m = events.copy()
         m["ประเภท"] = m["category"].map(CATEGORY_LABEL).fillna(m["category"])
         m["แหล่ง"] = m["sources"].apply(lambda s: ", ".join(SOURCE_LABEL.get(x, x) for x in s))
         m["_size"] = m["n_sources"] * 4
-        # แผนที่ OpenStreetMap ไม่ต้องใช้ API key (แผนที่ของ CARTO ต้องใช้ key แล้ว)
         fig = px.scatter_mapbox(m, lat="lat", lon="lon", color="ประเภท", size="_size", size_max=14,
                                 hover_name="title",
                                 hover_data={"แหล่ง": True, "ประเภท": True, "_size": False, "lat": False, "lon": False},
                                 color_discrete_map={CATEGORY_LABEL[k]: v for k, v in CATEGORY_COLOR.items()},
-                                zoom=10.5, center={"lat": 13.75, "lon": 100.55}, opacity=0.85)
+                                zoom=10.5, center={"lat": 13.75, "lon": 100.55}, opacity=0.9)
         # ระบุแหล่งภาพแผนที่เอง ไม่พึ่งสไตล์สำเร็จรูป และไม่ใช้ธีมของ Streamlit กับกราฟนี้ ไม่ให้ถูกเปลี่ยนเป็น CARTO
-        fig.update_layout(height=430, margin=dict(l=0, r=0, t=10, b=0), mapbox_style="white-bg",
-                          mapbox_layers=[{"below": "traces", "sourcetype": "raster",
+        fig.update_layout(height=440, margin=dict(l=0, r=0, t=0, b=0), mapbox_style="white-bg",
+                          legend=dict(bgcolor="rgba(30,30,30,0.85)", x=0.01, y=0.99),
+                          mapbox_layers=[{"below": "traces", "sourcetype": "raster", "opacity": 0.75,
                                           "sourceattribution": "© OpenStreetMap contributors",
                                           "source": ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"]}])
-        st.plotly_chart(fig, use_container_width=True, theme=None)
+        st.plotly_chart(fig, use_container_width=True, theme=None, config=CHART_CONFIG)
     else:
         st.info("ไม่มีเหตุการณ์ตามตัวกรองที่เลือก")
 with right:
-    st.subheader("จำนวนตามประเภทและแหล่ง")
     if len(records):
         cnt = records.groupby(["category", "source"]).size().reset_index(name="n")
         cnt["ประเภท"] = cnt["category"].map(CATEGORY_LABEL).fillna(cnt["category"])
@@ -161,11 +186,13 @@ with right:
         fig = px.bar(cnt, x="n", y="ประเภท", color="แหล่ง", orientation="h",
                      color_discrete_map={SOURCE_LABEL[k]: v for k, v in SOURCE_COLOR.items()},
                      labels={"n": "จำนวน", "ประเภท": ""})
-        fig.update_layout(height=430, margin=dict(l=0, r=0, t=10, b=0))
-        st.plotly_chart(fig, use_container_width=True)
+        fig.update_layout(height=440, margin=dict(l=8, r=8, t=40, b=8), bargap=0.35,
+                          title=dict(text="จำนวนตามประเภทและแหล่ง", font=dict(size=14, color=TEXT2), x=0.02),
+                          legend=dict(orientation="h", y=-0.12, title=None), yaxis=dict(showgrid=False))
+        st.plotly_chart(fig, use_container_width=True, config=CHART_CONFIG)
 
 # ---------------- ตาราง ----------------
-band("ตารางข้อมูล")
+band("ข้อมูลดิบจากทุกแหล่งและผลหลังรวม/ตัดรายการซ้ำ", "ตารางข้อมูล")
 t1, t2, t3 = st.tabs(["ความหนาแน่น TomTom", "เหตุการณ์ (ตัดซ้ำข้ามแหล่งแล้ว)", "ข้อมูลรวมทุกแหล่ง"])
 with t1:
     st.dataframe(congestion.drop(columns=["source_id"]).sort_values(["category", "period"]), hide_index=True,
