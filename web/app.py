@@ -143,10 +143,13 @@ with left:
                                 hover_name="title",
                                 hover_data={"แหล่ง": True, "ประเภท": True, "_size": False, "lat": False, "lon": False},
                                 color_discrete_map={CATEGORY_LABEL[k]: v for k, v in CATEGORY_COLOR.items()},
-                                mapbox_style="open-street-map", zoom=10.5, center={"lat": 13.75, "lon": 100.55},
-                                opacity=0.85)
-        fig.update_layout(height=430, margin=dict(l=0, r=0, t=10, b=0))
-        st.plotly_chart(fig, use_container_width=True)
+                                zoom=10.5, center={"lat": 13.75, "lon": 100.55}, opacity=0.85)
+        # ระบุแหล่งภาพแผนที่เอง ไม่พึ่งสไตล์สำเร็จรูป และไม่ใช้ธีมของ Streamlit กับกราฟนี้ ไม่ให้ถูกเปลี่ยนเป็น CARTO
+        fig.update_layout(height=430, margin=dict(l=0, r=0, t=10, b=0), mapbox_style="white-bg",
+                          mapbox_layers=[{"below": "traces", "sourcetype": "raster",
+                                          "sourceattribution": "© OpenStreetMap contributors",
+                                          "source": ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"]}])
+        st.plotly_chart(fig, use_container_width=True, theme=None)
     else:
         st.info("ไม่มีเหตุการณ์ตามตัวกรองที่เลือก")
 with right:
