@@ -7,7 +7,7 @@ from sqlalchemy import create_engine
 
 @st.cache_resource
 def engine():
-    return create_engine(os.getenv("TRAFFIC_DB_URL", "postgresql+psycopg2://traffic:traffic@localhost:5432/traffic"))
+    return create_engine(os.environ["TRAFFIC_DB_URL"])  # กำหนดใน docker-compose จากค่าใน .env
 
 
 @st.cache_data(ttl=30)

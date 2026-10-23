@@ -1,9 +1,4 @@
--- รันอัตโนมัติครั้งแรกที่สร้าง container postgres
-CREATE USER traffic WITH PASSWORD 'traffic';
-CREATE DATABASE traffic OWNER traffic;
-
-\connect traffic
-SET ROLE traffic;
+-- ตารางของฐานข้อมูล traffic (สร้างโดย sql/init.sh ตอนเริ่ม container ครั้งแรก)
 
 -- ชุดข้อมูลรวม: ทุกแหล่งอยู่ใน schema เดียวกัน
 --   record_type = congestion (TomTom: % รถติด) / incident (Longdo: เหตุการณ์) / complaint (Traffy: เรื่องร้องเรียน)
@@ -74,4 +69,3 @@ CREATE TABLE pipeline_run (
     status          TEXT NOT NULL           -- SUCCESS / PARTIAL / QUALITY_FAILED
 );
 
-RESET ROLE;

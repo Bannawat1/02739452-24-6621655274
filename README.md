@@ -46,7 +46,7 @@ TaskGroup ────┼─ extract.longdo       (feed)   ─┼──> transfo
 
 **กฎตรวจคุณภาพรายแถว:** ฟิลด์ที่จำเป็นต้องไม่ว่าง (แยกตามประเภท), ระดับรถติด 0–300%, ความเร็ว 0–150 กม./ชม., ความรุนแรง 0–5, พิกัดต้องอยู่ในกรุงเทพฯ และเวลาต้องไม่อยู่ในอนาคต
 
-**ตารางใน PostgreSQL (ฐานข้อมูล `traffic`)**: `traffic_record` (ข้อมูลรวม), `traffic_event` (ตัดซ้ำข้ามแหล่งแล้ว), `quality_issue`, `pipeline_run` (ดู `sql/init.sql`)
+**ตารางใน PostgreSQL (ฐานข้อมูล `traffic`)**: `traffic_record` (ข้อมูลรวม), `traffic_event` (ตัดซ้ำข้ามแหล่งแล้ว), `quality_issue`, `pipeline_run` (ดู `sql/schema.sql`)
 
 ## งานที่ทำได้ตามระดับ
 
@@ -72,9 +72,9 @@ docker compose up -d --build  # ครั้งแรกใช้เวลา 5-
 
 | บริการ | URL | หมายเหตุ |
 |---|---|---|
-| Airflow | http://localhost:8080 | user `admin` / pass `admin` |
+| Airflow | http://localhost:8080 | user/pass ตาม `AIRFLOW_ADMIN_USER` / `AIRFLOW_ADMIN_PASSWORD` ใน `.env` |
 | Web dashboard | http://localhost:8501 | มี 2 หน้า: dashboard และ Pipeline Status |
-| PostgreSQL | localhost:5432 | db `traffic` user `traffic` pass `traffic` |
+| PostgreSQL | localhost:5432 | db `traffic` user/pass ตาม `TRAFFIC_DB_USER` / `TRAFFIC_DB_PASSWORD` ใน `.env` |
 
 DAG `bkk_traffic_pipeline` เปิดใช้อัตโนมัติและรันทุก 15 นาที ถ้าอยากเห็นผลทันทีให้กดปุ่ม ▶ (Trigger DAG) ในหน้า Airflow รอประมาณ 1 นาที แล้วรีเฟรชหน้าเว็บ
 
@@ -107,7 +107,7 @@ docker compose exec postgres psql -U traffic -d traffic -c "SELECT source, COUNT
 │   ├── pages/1_Pipeline_Status.py  # หน้าสถานะ pipeline (โบนัส)
 │   ├── db.py, theme.py
 │   └── Dockerfile
-├── sql/init.sql                  # สร้างฐานข้อมูลและตาราง
+├── sql/init.sh, sql/schema.sql   # สร้างฐานข้อมูล (อ่านรหัสผ่านจาก .env) และตาราง
 ├── tests/                        # unit tests (ใช้ตัวอย่างข้อมูลจริงของแต่ละแหล่ง)
 ├── docker-compose.yml
 ├── requirements.txt
