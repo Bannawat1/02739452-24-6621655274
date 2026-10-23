@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<title>สรุปภาพรวมงาน 02739452</title>
+<!--
+  วิธีใช้: แทนที่ภาพใน docs/img/ ด้วยภาพจากเครื่องตัวเอง (graph.png, grid.png, web_main.png, web_status.png)
+  แก้ข้อความใน [วงเล็บเหลี่ยม] แล้วเปิดไฟล์นี้ใน Chrome > Print > Save as PDF (A4, margin Default)
+  ตั้งชื่อไฟล์: ลำดับที่_รหัสนิสิต_summary.pdf
+-->
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@350..700&display=swap" rel="stylesheet">
+<style>
+  @page { size: A4; margin: 14mm 14mm 12mm; }
+  body { font-family: "Noto Sans Thai", "Sarabun", sans-serif; color: #223548; font-size: 10.5pt; line-height: 1.5; margin: 0; }
+  h1 { font-size: 17pt; font-weight: 600; color: #000; margin: 0 0 2px; }
+  h2 { font-size: 12.5pt; font-weight: 600; color: #0057d2; margin: 12px 0 4px; border-bottom: 1.5px solid #eaecee; padding-bottom: 2px; }
+  h3 { font-size: 11pt; font-weight: 600; color: #000; margin: 8px 0 2px; }
+  p { margin: 3px 0; }
+  .meta { color: #475e75; font-size: 9.5pt; }
+  .meta b { color: #223548; }
+  table { border-collapse: collapse; width: 100%; font-size: 9.5pt; margin: 4px 0; }
+  th, td { border-bottom: 1px solid #eaecee; padding: 3px 6px; text-align: left; vertical-align: top; }
+  th { background: #f5f6f7; font-weight: 600; }
+  .ok { color: #1a7f37; font-weight: 600; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 10px; margin-top: 4px; }
+  figure { margin: 0; }
+  figure img { width: 100%; border: 1px solid #eaecee; border-radius: 6px; display: block; }
+  figcaption { font-size: 8.5pt; color: #475e75; text-align: center; margin-top: 1px; }
+  ul, ol { margin: 2px 0 2px 18px; padding: 0; }
+  li { margin: 1px 0; }
+  code { font-size: 9pt; background: #f5f6f7; padding: 0 3px; border-radius: 3px; }
+  .problem { background: #f5f6f7; border-radius: 6px; padding: 5px 10px; margin: 5px 0; break-inside: avoid; }
+  .problem p { margin: 1px 0; }
+  .page-break { break-before: page; }
+</style>
+</head>
+<body>
+
+<h1>ระบบรวบรวมข้อมูลความหนาแน่นการจราจรกรุงเทพฯ</h1>
+<p class="meta"><b>ชื่อ</b> [ชื่อ-นามสกุล] · <b>รหัสนิสิต</b> [รหัสนิสิต] · <b>หมู่</b> [หมู่] · <b>ลำดับที่</b> [ลำดับที่]<br>
+<b>GitHub:</b> https://github.com/[username]/02739452-[ลำดับที่]-[รหัสนิสิต]</p>
+
+<h2>1. ภาพรวมงานแต่ละส่วน</h2>
+<p>ดึงข้อมูลความหนาแน่นการจราจรบนถนนสายหลักของกรุงเทพฯ ทุก 15 นาทีจาก 3 แหล่ง รวมเป็นชุดข้อมูลเดียวด้วย Airflow DAG
+เก็บใน PostgreSQL และแสดงผลบนเว็บ Streamlit ที่อ่านจาก PostgreSQL โดยตรง ทุกแหล่งถูกแปลงเป็น schema เดียวกัน
+<code>source, source_id, observed_at, road, road_key, length_m, speed_kmh, delay_s, jam_level(0–5)</code>
+สำหรับ TomTom และ HERE ใช้ Travel Time Index (เวลาจริง ÷ เวลาตอนถนนโล่ง) แปลงเป็นระดับ 0–5 แบบเดียวกับ Waze</p>
+<table>
+  <tr><th>แหล่ง</th><th>วิธีดึง</th><th>ข้อมูลต่อรอบ</th></tr>
+  <tr><td>Waze Live Map</td><td>Web scraping ด้วย requests (ไม่ใช้ Selenium) ตรวจ robots.txt ก่อนดึงทุกครั้ง ไม่เก็บข้อมูลผู้ใช้ (PDPA)</td><td>[~100–300] ช่วงถนนที่รถติด</td></tr>
+  <tr><td>TomTom Routing API</td><td>REST API (key ฟรี)</td><td>15 ช่วงถนนหลัก</td></tr>
+  <tr><td>HERE Routing API v8</td><td>REST API (key ฟรี)</td><td>15 ช่วงถนนเดียวกัน</td></tr>
+</table>
+<table>
+  <tr><th style="width:16%">ระดับ</th><th>สิ่งที่ทำได้</th><th style="width:9%">ผล</th></tr>
+  <tr><td>1 ขั้นต่ำ</td><td>DAG extract → transform → load → PostgreSQL → เว็บแสดงตารางและกราฟ</td><td class="ok">ครบ</td></tr>
+  <tr><td>2 มาตรฐาน</td><td>3 แหล่งรันขนานใน TaskGroup <code>extract</code>, schema เดียวกัน, UPSERT <code>ON CONFLICT (source, source_id, observed_at)</code> (Clear แล้วรันซ้ำ จำนวนแถวไม่เพิ่ม), เว็บมี KPI 5 ตัว และตัวกรอง (รอบเวลา, แหล่ง, ระดับ, ชื่อถนน)</td><td class="ok">ครบ</td></tr>
+  <tr><td>3 ท้าทาย</td><td>แหล่งล่ม/ไม่มี key → task เป็น failed/skipped แต่ <code>transform</code> ใช้ <code>trigger_rule="all_done"</code> จึงรวมจากแหล่งที่เหลือได้ (สถานะ PARTIAL);
+    ตัดรายการซ้ำข้ามแหล่งด้วยตาราง <code>road_status</code> (จับคู่ชื่อถนนด้วย <code>road_key</code> เช่น "ถ.พระราม 4" = "Rama IV Rd" เหลือ 1 แถวต่อถนนต่อรอบ);
+    ตรวจคุณภาพ (ค่าว่าง, ความเร็ว 0–150, ความยาว &gt; 0, ระดับ 0–5) แล้ว <code>@task.branch</code> ไป <code>load</code> หรือ <code>quarantine</code></td><td class="ok">ครบ</td></tr>
+  <tr><td>โบนัส</td><td>หน้า "Pipeline Status" บนเว็บ: สถานะแต่ละแหล่ง ประวัติการรัน และแถวที่ไม่ผ่านการตรวจ</td><td class="ok">ครบ</td></tr>
+</table>
+<p>ข้อมูลสะสม: <b>[จำนวน]</b> รายการ ใน <b>[จำนวน]</b> รอบ (ตรวจด้วย <code>SELECT COUNT(*) FROM traffic_record</code>)</p>
+
+<div class="grid">
+  <figure><img src="img/graph.png"><figcaption>ภาพที่ 1 Graph view ของ DAG bkk_traffic_pipeline</figcaption></figure>
+  <figure><img src="img/grid.png"><figcaption>ภาพที่ 2 Grid view แสดงรอบที่สำเร็จ แหล่งที่ล่ม และ branch quarantine</figcaption></figure>
+  <figure><img src="img/web_main.png"><figcaption>ภาพที่ 3 เว็บ dashboard: KPI ตัวกรอง แผนที่ และอันดับถนน</figcaption></figure>
+  <figure><img src="img/web_status.png"><figcaption>ภาพที่ 4 หน้าสถานะ Pipeline (โบนัส)</figcaption></figure>
+</div>
+
+<h2 class="page-break">2. ปัญหาที่พบและวิธีแก้</h2>
+<div class="problem">
+  <h3>ปัญหา 1: Clear แล้วรันซ้ำ จำนวนแถวยังเพิ่มขึ้น แม้จะใช้ UPSERT แล้ว</h3>
+  <p><b>อาการ:</b> กด Clear รอบเดิมใน Airflow จำนวนแถวของรอบนั้นใน <code>traffic_record</code> เพิ่มขึ้นทุกครั้ง</p>
+  <p><b>วิธีหาสาเหตุ:</b> query <code>COUNT(*) GROUP BY source</code> ของรอบนั้นก่อนและหลังรันซ้ำ พบว่าแถวที่เพิ่มเป็นของ Waze ทั้งหมด
+     เมื่อเทียบ <code>source_id</code> พบว่าเป็น uuid ใหม่ เพราะ Waze เป็นข้อมูลสด รันซ้ำจึงได้รายการรถติดชุดใหม่ ทำให้ UPSERT มองว่าเป็นแถวใหม่</p>
+  <p><b>วิธีแก้:</b> ใน transaction เดียวกับ UPSERT ให้ลบแถวของรอบเดียวกันที่ไม่อยู่ในชุดใหม่ (เฉพาะแหล่งที่ดึงสำเร็จ)
+     ส่วน <code>road_status</code> ให้ลบแล้วสร้างใหม่ทั้งรอบ ผลคือรันซ้ำกี่ครั้งจำนวนแถวก็เท่ากับ snapshot ล่าสุด ไม่เพิ่มขึ้น</p>
+</div>
+<div class="problem">
+  <h3>ปัญหา 2: แผนที่บน dashboard ขึ้นข้อความ "Error fetching Streamlit Mapbox token"</h3>
+  <p><b>อาการ:</b> ส่วนอื่นของหน้าเว็บแสดงได้ปกติ แต่แผนที่ <code>st.pydeck_chart</code> ไม่ขึ้น</p>
+  <p><b>วิธีหาสาเหตุ:</b> อ่านข้อความ error และเอกสารของ Streamlit พบว่า pydeck ใน Streamlit ต้องดึง Mapbox token จาก server ของ Streamlit ก่อนวาด
+     ลองเปลี่ยน <code>map_provider="carto"</code> แล้วก็ยังขึ้น error เดิม</p>
+  <p><b>วิธีแก้:</b> เปลี่ยนไปใช้ <code>plotly.express.scatter_mapbox</code> กับสไตล์ <code>carto-positron</code> ซึ่งไม่ต้องใช้ token
+     (ลองใช้ <code>scatter_map</code> ก่อนแล้วได้กราฟว่าง เพราะ plotly.js ที่ติดมากับ Streamlit 1.39 ยังไม่รองรับ)</p>
+</div>
+<div class="problem">
+  <h3>ปัญหา 3: CSS ที่ใส่เพื่อตกแต่งเว็บกลายเป็นข้อความโผล่บนหน้า</h3>
+  <p><b>อาการ:</b> โค้ด CSS แสดงเป็นตัวหนังสือด้านบนของหน้า และหน้าเว็บไม่มีสไตล์</p>
+  <p><b>วิธีหาสาเหตุ:</b> ข้อความที่โผล่เริ่มหลังบรรทัดว่างแรกในสตริง CSS จึงสันนิษฐานว่า Markdown ของ <code>st.markdown</code> ปิดบล็อก HTML เมื่อเจอบรรทัดว่าง</p>
+  <p><b>วิธีแก้:</b> ลบบรรทัดว่างออกก่อนส่งเข้า <code>st.markdown(..., unsafe_allow_html=True)</code></p>
+</div>
+<p class="meta">[เพิ่ม/แก้ปัญหาที่เจอจริงตอนรันบนเครื่องตัวเอง เช่น พอร์ตชน, API key ผิด, Waze ตอบ 403]</p>
+
+<h2>3. การวางแผนและจัดลำดับงาน</h2>
+<table>
+  <tr><th style="width:20%">เวลา</th><th>งาน</th><th style="width:30%">เหตุผล</th></tr>
+  <tr><td>13:00–13:20</td><td>เลือกแหล่งข้อมูล ตรวจ robots.txt สมัคร API key วางแผน schema กลาง</td><td>schema กลางต้องนิ่งก่อน งานส่วนอื่นจึงจะเดินได้</td></tr>
+  <tr><td>13:20–14:00</td><td>docker-compose (Airflow + PostgreSQL), DAG 1 แหล่งให้ครบ E-T-L และหน้าเว็บตาราง + กราฟ</td><td>เก็บคะแนนระดับ 1 (30) ให้ได้ก่อน</td></tr>
+  <tr><td>14:00–14:40</td><td>เพิ่มเป็น 3 แหล่งใน TaskGroup, UPSERT, KPI และตัวกรอง</td><td>ระดับ 2 ต่อยอดจากโค้ดเดิมได้ทันที</td></tr>
+  <tr><td>14:40–15:15</td><td>all_done, dedupe ข้ามแหล่ง, quality check + branch, หน้าสถานะ pipeline</td><td>ระดับ 3 และโบนัส</td></tr>
+  <tr><td>15:15–15:40</td><td>รันจริง เก็บข้อมูลให้เกิน 100 รายการ ทดสอบ Clear/แหล่งล่ม จับภาพหน้าจอ</td><td>อาจารย์จะรันจาก repo ต้องยืนยันว่ารันได้จริง</td></tr>
+  <tr><td>15:40–16:00</td><td>README, ตรวจว่าไม่มี key ใน repo, push, ทำ PDF</td><td>นับเฉพาะ commit ก่อน 16:00 จึงต้องเผื่อเวลาไว้</td></tr>
+</table>
+<h3>งานที่ตัดออกและเหตุผล</h3>
+<ul>
+  <li><b>Google Maps Routes API:</b> ต้องผูกบัตรเครดิต และโควตาฟรีแบบ traffic-aware มีน้อย จึงใช้ HERE แทนซึ่งให้ข้อมูลแบบเดียวกัน</li>
+  <li><b>Dynamic Task Mapping:</b> โบนัสได้คะแนนเท่ากับหน้าสถานะ pipeline ซึ่งยังช่วยดูว่าแหล่งไหนล่มด้วย จึงเลือกทำหน้าสถานะ</li>
+  <li><b>เส้นถนนแบบ polyline บนแผนที่:</b> ข้อมูลเส้นของ Waze มีขนาดใหญ่ ทำให้ XCom หนัก จึงเก็บแค่จุดกลางของช่วงถนน</li>
+  <li><b>Waze alerts (อุบัติเหตุ/รายงานจากผู้ใช้):</b> มีชื่อผู้รายงาน ขัดกับ PDPA จึงดึงเฉพาะข้อมูลรถติด (<code>types=traffic</code>)</li>
+</ul>
+
+</body>
+</html>

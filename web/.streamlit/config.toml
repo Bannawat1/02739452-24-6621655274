@@ -1,0 +1,11 @@
+# โทนสีตาม DESIGN-sap.md: พื้นขาว, chrome เทาอ่อน, น้ำเงินเป็นสีเน้นสีเดียว
+[theme]
+base = "light"
+primaryColor = "#0057d2"
+backgroundColor = "#ffffff"
+secondaryBackgroundColor = "#f5f6f7"
+textColor = "#223548"
+font = "sans serif"
+
+[client]
+toolbarMode = "minimal"

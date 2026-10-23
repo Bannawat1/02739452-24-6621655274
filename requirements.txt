@@ -1,0 +1,9 @@
+# web dashboard (Airflow ใช้ image ทางการซึ่งมี requests / psycopg2 / postgres provider อยู่แล้ว)
+streamlit==1.39.0
+pandas==2.2.3
+plotly==5.24.1
+SQLAlchemy==2.0.36
+psycopg2-binary==2.9.10
+# สำหรับรันเทสต์บนเครื่อง
+requests==2.32.3
+pytest==8.3.3
