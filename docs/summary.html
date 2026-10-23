@@ -26,6 +26,7 @@
   figure img { width: 100%; border: 1px solid #d9e2e8; border-radius: 6px; display: block; }
   figcaption { font-size: 8pt; color: #5b6b7a; text-align: center; margin-top: 2px; }
   .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 10px; }
+  .shots { display: grid; grid-template-columns: 0.9fr 3.1fr; gap: 10px; align-items: start; }
   .placeholder { border: 2px dashed #9fb3c2; border-radius: 6px; height: 190px; display: flex; align-items: center;
                  justify-content: center; color: #5b6b7a; font-size: 9pt; text-align: center; padding: 8px; }
   .problem { background: #f3f7f9; border-left: 3px solid #00acc1; border-radius: 4px; padding: 5px 9px; margin: 5px 0; break-inside: avoid; }
@@ -66,11 +67,11 @@
 <figure><img src="img/graph.png"><figcaption>ภาพที่ 1 Graph view: TaskGroup extract รัน 3 แหล่งขนาน → transform → quality_check (branch) → load (upsert → dedupe) / quarantine → record_run</figcaption></figure>
 
 <div class="page-break"></div>
-<figure><img src="img/grid.png"><figcaption>ภาพที่ 2 Grid view: ทุก task รวมทั้ง 3 แหล่งสำเร็จทุกรอบ ส่วน quarantine ถูก skip เพราะข้อมูลผ่านการตรวจคุณภาพ</figcaption></figure>
-<div class="grid2">
-  <figure>[[WEB_MAIN]]<figcaption>ภาพที่ 3 Dashboard: KPI, heatmap ความหนาแน่นรายชั่วโมง และเหตุการณ์ล่าสุด</figcaption></figure>
-  <figure>[[WEB_STATUS]]<figcaption>ภาพที่ 4 หน้า Pipeline Status (โบนัส)</figcaption></figure>
+<div class="shots">
+  <figure><img src="img/grid.png"><figcaption>ภาพที่ 2 Grid view: 6 รอบล่าสุด ทุก task รวมทั้ง 3 แหล่งสำเร็จ ส่วน quarantine ถูก skip เพราะข้อมูลผ่านการตรวจคุณภาพ</figcaption></figure>
+  <figure>[[WEB_MAIN]]<figcaption>ภาพที่ 3 เว็บ dashboard: ตัวกรองด้านซ้าย, ความหนาแน่นรายชั่วโมง/รายเดือน, แผนที่เหตุการณ์ที่ตัดซ้ำข้ามแหล่งแล้ว, จำนวนตามประเภทและแหล่ง และตารางข้อมูล</figcaption></figure>
 </div>
+[[WEB_STATUS_BLOCK]]
 
 <h2>2. ปัญหาที่พบและวิธีแก้</h2>
 <div class="problem">
