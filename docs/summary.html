@@ -39,7 +39,7 @@
 <body>
 
 <h1>ระบบรวบรวมข้อมูลความหนาแน่นการจราจรกรุงเทพฯ</h1>
-<p class="meta"><b>ชื่อ</b> [ชื่อ-นามสกุล] · <b>รหัสนิสิต</b> 6621655274 · <b>หมู่</b> [หมู่] · <b>ลำดับที่</b> 24 ·
+<p class="meta"><b>รหัสนิสิต</b> 6621655274 · <b>ลำดับที่</b> 24 ·
 <b>GitHub:</b> https://github.com/Bannawat1/02739452-24-6621655274</p>
 
 <h2>1. ภาพรวมงานแต่ละส่วน</h2>
@@ -63,7 +63,8 @@
     <b>ตรวจคุณภาพแล้วแตกเส้นทาง:</b> ค่าว่าง ช่วงค่า พิกัดต้องอยู่ในกรุงเทพฯ เวลาไม่อยู่ในอนาคต แล้ว <code>@task.branch</code> ไป <code>load</code> หรือ <code>quarantine</code></td><td class="ok">ครบ</td></tr>
   <tr><td>โบนัส</td><td>หน้า "Pipeline Status" บนเว็บ แสดงสถานะแต่ละแหล่ง ประวัติการรัน และแถวที่ไม่ผ่านการตรวจ</td><td class="ok">ครบ</td></tr>
 </table>
-<p>ข้อมูลสะสม: <b>[จำนวน]</b> รายการ (เกณฑ์ ≥ 100) · ทุกรอบที่รันบนเครื่องผู้จัดทำ ทั้ง 3 แหล่งเป็น success (ภาพที่ 1–2)</p>
+<p><b>จำนวนข้อมูล:</b> เกิน 100 รายการตั้งแต่รอบแรก เพราะ TomTom อย่างเดียวให้ 184 ค่าต่อขอบเขต (รายชั่วโมง 168 + รายเดือน 12 + ช่วงเร่งด่วน 4) รวมกับเหตุการณ์จาก Longdo และ Traffy
+ตรวจได้ด้วย <code>SELECT COUNT(*) FROM traffic_record</code> · ทุกรอบที่รันบนเครื่องผู้จัดทำ ทั้ง 3 แหล่งเป็น success (ภาพที่ 1–2)</p>
 <figure><img src="img/graph.png"><figcaption>ภาพที่ 1 Graph view: TaskGroup extract รัน 3 แหล่งขนาน → transform → quality_check (branch) → load (upsert → dedupe) / quarantine → record_run</figcaption></figure>
 
 <div class="page-break"></div>
