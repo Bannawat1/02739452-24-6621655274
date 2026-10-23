@@ -1,13 +1,14 @@
-"""ความหนาแน่นการจราจรกรุงเทพฯ: Waze (scrape) + TomTom + HERE -> PostgreSQL
+"""ความหนาแน่นการจราจรกรุงเทพฯ: TomTom Traffic Index (scrape) + Longdo + Traffy Fondue -> PostgreSQL
 
-    extract (TaskGroup, รันขนาน)                transform      quality_check (branch)
-    ├─ waze   ─┐
-    ├─ tomtom ─┼──> transform ──> quality_check ─┬─> load.upsert_records ─> load.dedupe_road_status ─┐
-    └─ here   ─┘   (all_done)                    └─> quarantine ────────────────────────────────────┴─> record_run
+    extract (TaskGroup, รันขนาน)                     transform      quality_check (branch)
+    ├─ tomtom_index ─┐
+    ├─ longdo       ─┼──> transform ──> quality_check ─┬─> load.upsert_records ─> load.dedupe_events ─┐
+    └─ traffy       ─┘   (all_done)                    └─> quarantine ────────────────────────────────┴─> record_run
 
-- แหล่งใดล่ม (failed) หรือไม่มี key (skipped) transform ยังรวมข้อมูลจากแหล่งที่เหลือต่อ
-- UPSERT ด้วย UNIQUE (source, source_id, observed_at) -> Clear/รันซ้ำแล้วจำนวนแถวไม่เพิ่ม
-- dedupe_road_status รวมรายการถนนเดียวกันจากหลายแหล่งให้เหลือ 1 แถวต่อถนนต่อรอบ
+- ทุกแหล่งไม่ต้องใช้ API key
+- แหล่งใดล่ม (failed) transform ยังรวมข้อมูลจากแหล่งที่เหลือต่อ
+- UPSERT ด้วย UNIQUE (source, source_id) -> Clear/รันซ้ำแล้วจำนวนแถวไม่เพิ่ม
+- dedupe_events รวมเหตุการณ์เดียวกันจาก Longdo และ Traffy (วันเดียวกัน, ห่างกัน ~300 ม., กลุ่มเดียวกัน) ให้เหลือ 1 แถว
 """
 from datetime import datetime, timedelta, timezone
 
@@ -92,59 +93,45 @@ def bkk_traffic_pipeline():
 
         @task
         def upsert_records(data):
-            rows = [(r["source"], r["source_id"], data["observed_at"], r["road"], r["road_key"],
-                     r["length_m"], r["speed_kmh"], r["delay_s"], r["jam_level"], r["lat"], r["lon"])
-                    for r in data["records"]]
+            cols = ("source", "source_id", "record_type", "category", "title", "area", "period", "event_time",
+                    "lat", "lon", "congestion_pct", "speed_kmh", "free_flow_kmh", "severity", "dedup_key")
+            rows = [tuple(r[c] for c in cols) for r in data["records"]]
+            updates = ", ".join(f"{c} = EXCLUDED.{c}" for c in cols[2:])
             hook = PostgresHook(postgres_conn_id=CONN_ID)
             with hook.get_conn() as conn, conn.cursor() as cur:
-                execute_values(cur, """
-                    INSERT INTO traffic_record (source, source_id, observed_at, road, road_key, length_m,
-                                                speed_kmh, delay_s, jam_level, lat, lon)
-                    VALUES %s
-                    ON CONFLICT (source, source_id, observed_at) DO UPDATE SET
-                        road = EXCLUDED.road, road_key = EXCLUDED.road_key, length_m = EXCLUDED.length_m,
-                        speed_kmh = EXCLUDED.speed_kmh, delay_s = EXCLUDED.delay_s,
-                        jam_level = EXCLUDED.jam_level, lat = EXCLUDED.lat, lon = EXCLUDED.lon,
-                        loaded_at = NOW()
+                cur.execute("SELECT COUNT(*) FROM traffic_record")
+                before = cur.fetchone()[0]
+                execute_values(cur, f"""
+                    INSERT INTO traffic_record ({", ".join(cols)}) VALUES %s
+                    ON CONFLICT (source, source_id) DO UPDATE SET {updates}, last_seen = NOW()
                 """, rows)
-                # ข้อมูลสดอาจเปลี่ยนเมื่อรันซ้ำ (เช่น Waze ได้ uuid ใหม่) -> ลบแถวเก่าของรอบนี้ที่ไม่อยู่ในชุดใหม่
-                # เฉพาะแหล่งที่ดึงสำเร็จรอบนี้ เพื่อให้รันซ้ำแล้วจำนวนแถวไม่เพิ่ม
-                loaded = sorted({r["source"] for r in data["records"]})
-                cur.execute("""
-                    DELETE FROM traffic_record
-                    WHERE observed_at = %s AND source = ANY(%s) AND source || ':' || source_id <> ALL(%s)
-                """, (data["observed_at"], loaded, [f"{r['source']}:{r['source_id']}" for r in data["records"]]))
-                cur.execute("SELECT COUNT(*) FROM traffic_record WHERE observed_at = %s", (data["observed_at"],))
-                print(f"upsert {len(rows)} แถว, ในรอบนี้มีทั้งหมด {cur.fetchone()[0]} แถว")
-            return data["observed_at"]
+                cur.execute("SELECT COUNT(*) FROM traffic_record")
+                after = cur.fetchone()[0]
+            print(f"upsert {len(rows)} แถว: ตารางมี {before} -> {after} แถว (ใหม่ {after - before})")
 
         @task
-        def dedupe_road_status(observed_at):
+        def dedupe_events():
             hook = PostgresHook(postgres_conn_id=CONN_ID)
             with hook.get_conn() as conn, conn.cursor() as cur:
-                cur.execute("DELETE FROM road_status WHERE observed_at = %s", (observed_at,))
+                # สร้างตารางเหตุการณ์ที่ตัดซ้ำข้ามแหล่งแล้วใหม่ทั้งหมด จากเหตุการณ์ 30 วันล่าสุด
+                cur.execute("DELETE FROM traffic_event")
                 cur.execute("""
-                    INSERT INTO road_status (road_key, observed_at, road, sources, n_sources, n_records,
-                                             avg_speed_kmh, max_jam_level, total_delay_s, total_length_m, lat, lon)
-                    SELECT road_key, observed_at,
-                           MODE() WITHIN GROUP (ORDER BY road),
+                    INSERT INTO traffic_event (dedup_key, title, category, sources, n_sources, n_records,
+                                               first_time, max_severity, lat, lon)
+                    SELECT dedup_key,
+                           -- ใช้ชื่อเหตุการณ์จาก Longdo ก่อน (ละเอียดกว่า) ถ้าไม่มีใช้ของ Traffy
+                           (ARRAY_AGG(title ORDER BY (source = 'longdo') DESC, event_time))[1],
+                           (ARRAY_AGG(category ORDER BY (source = 'longdo') DESC, event_time))[1],
                            ARRAY_AGG(DISTINCT source ORDER BY source),
                            COUNT(DISTINCT source), COUNT(*),
-                           -- ถ่วงน้ำหนักตามความยาวช่วงถนน
-                           ROUND(SUM(speed_kmh * length_m) / NULLIF(SUM(length_m), 0), 2),
-                           MAX(jam_level), SUM(delay_s), SUM(length_m), AVG(lat), AVG(lon)
+                           MIN(event_time), MAX(severity), AVG(lat), AVG(lon)
                     FROM traffic_record
-                    WHERE observed_at = %s AND road_key <> ''
-                    GROUP BY road_key, observed_at
-                    ON CONFLICT (road_key, observed_at) DO UPDATE SET
-                        road = EXCLUDED.road, sources = EXCLUDED.sources, n_sources = EXCLUDED.n_sources,
-                        n_records = EXCLUDED.n_records, avg_speed_kmh = EXCLUDED.avg_speed_kmh,
-                        max_jam_level = EXCLUDED.max_jam_level, total_delay_s = EXCLUDED.total_delay_s,
-                        total_length_m = EXCLUDED.total_length_m, lat = EXCLUDED.lat, lon = EXCLUDED.lon
-                """, (observed_at,))
-                print(f"road_status: {cur.rowcount} ถนน")
+                    WHERE dedup_key IS NOT NULL AND event_time >= NOW() - INTERVAL '30 days'
+                    GROUP BY dedup_key
+                """)
+                print(f"traffic_event: {cur.rowcount} เหตุการณ์หลังตัดซ้ำข้ามแหล่ง")
 
-        dedupe_road_status(upsert_records(data))
+        upsert_records(data) >> dedupe_events()
 
     @task
     def quarantine(data):

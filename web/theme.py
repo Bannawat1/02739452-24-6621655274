@@ -14,7 +14,10 @@ CHROME, BAND = "#f5f6f7", "#eaecee"
 FONT = "Inter, 'Noto Sans Thai', sans-serif"
 
 # สีของแต่ละแหล่ง: ใช้โทนน้ำเงินของแบรนด์
-SOURCE_COLOR = {"waze": PRIMARY, "tomtom": NAVY, "here": SKY}
+SOURCE_COLOR = {"tomtom_index": PRIMARY, "longdo": NAVY, "traffy": SKY}
+# สีของประเภทเหตุการณ์ (สีตามความหมาย)
+CATEGORY_COLOR = {"flood": "#1f77b4", "accident": "#d22828", "roadwork": "#f0781e", "closure": "#6e0f0f",
+                  "traffic": "#e6b41e", "road": "#8c6d46", "other": INK_META}
 
 _CSS = f"""
 <link rel="preconnect" href="https://fonts.googleapis.com">

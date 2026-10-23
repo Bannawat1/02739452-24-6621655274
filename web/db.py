@@ -4,9 +4,6 @@ import pandas as pd
 import streamlit as st
 from sqlalchemy import create_engine
 
-LEVEL_LABEL = {0: "โล่ง", 1: "คล่องตัว", 2: "ปานกลาง", 3: "หนาแน่น", 4: "ติดขัด", 5: "ถนนปิด"}
-LEVEL_COLOR = {0: "#2ea043", 1: "#2ea043", 2: "#e6b41e", 3: "#f0781e", 4: "#d22828", 5: "#6e0f0f"}
-
 
 @st.cache_resource
 def engine():

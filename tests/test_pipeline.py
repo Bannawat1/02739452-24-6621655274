@@ -1,4 +1,5 @@
 """รัน: pytest tests"""
+import json
 import os
 import sys
 from unittest import mock
@@ -6,17 +7,16 @@ from unittest import mock
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "dags"))
 sys.path.insert(0, os.path.dirname(__file__))
 
-from sample_responses import HERE, TOMTOM, WAZE  # noqa: E402
+from sample_responses import LONGDO, TOMTOM_HTML, TRAFFY  # noqa: E402
 from traffic import quality, sources  # noqa: E402
-from traffic.corridors import CORRIDORS, road_key  # noqa: E402
 
 
 class Resp:
-    def __init__(self, payload, status=200):
-        self._p, self.status_code, self.text = payload, status, ""
+    def __init__(self, text="", status=200, payload=None):
+        self.text, self.status_code, self._p = text, status, payload
 
     def json(self):
-        return self._p
+        return self._p if self._p is not None else json.loads(self.text)
 
     def raise_for_status(self):
         if self.status_code >= 400:
@@ -25,58 +25,71 @@ class Resp:
 
 def fake_get(url, params=None, **kw):
     if url.endswith("robots.txt"):
-        return Resp(None, 404)
-    if "waze" in url:
-        return Resp(WAZE)
-    return Resp(TOMTOM if "tomtom" in url else HERE)
+        return Resp("User-agent: *\nCrawl-delay: 0\nDisallow: /admin/")
+    if "tomtom" in url:
+        return Resp(TOMTOM_HTML)
+    if "longdo" in url:
+        return Resp(payload=LONGDO)
+    return Resp(payload=TRAFFY)
 
 
-def test_road_key_matches_across_sources():
-    assert road_key("ถ.สุขุมวิท") == road_key("Sukhumvit Rd") == road_key("สุขุมวิท")
-    assert road_key("Rama IV Rd") == road_key("พระรามที่ 4") == road_key("ถนนพระราม 4")
+def extract_all():
+    with mock.patch.object(sources.requests, "get", fake_get):
+        return {name: s["extract"]() for name, s in sources.SOURCES.items()}
 
 
-def test_extract_and_transform_all_sources():
-    env = {"TOMTOM_API_KEY": "x", "HERE_API_KEY": "x"}
-    with mock.patch.dict(os.environ, env), mock.patch.object(sources.requests, "get", fake_get):
-        raw = {name: s["extract"]() for name, s in sources.SOURCES.items()}
-    assert len(raw["waze"]) == 4 and len(raw["tomtom"]) == len(CORRIDORS)
-    records, rejected = quality.transform(raw)
+def test_tomtom_scraping_parses_embedded_json():
+    items = extract_all()["tomtom_index"]
+    assert len(items) == 4 + 2 + 3  # base/am/pm/ampm + monthly 2 + weekHour 3
+    rec = {r["source_id"]: r for r in map(sources.parse_tomtom_index, items)}
+    assert rec["metro:all:weekHour:FRIDAY-17"]["congestion_pct"] == 105.2
+    assert rec["metro:all:weekHour:MONDAY-8"]["period"] == "1-Monday 08:00"
+    assert rec["metro:all:monthly:2025-01-01T00:00"]["period"] == "2025-01"
+
+
+def test_filters_bangkok_and_drops_personal_data():
+    raw = extract_all()
+    assert [e["eid"] for e in raw["longdo"]] == ["990001", "990002"]  # นอกกรุงเทพฯ ถูกกรองทิ้ง
+    assert all("contributor" not in e for e in raw["longdo"])
+    assert [t["ticket_id"] for t in raw["traffy"]] == ["2026-AAAA01", "2026-AAAA02"]  # เรื่องขยะถูกกรองทิ้ง
+    assert all("description" not in t and "photo_url" not in t for t in raw["traffy"])
+
+
+def test_transform_same_schema_and_cross_source_dedup_key():
+    records, rejected = quality.transform(extract_all())
     assert not rejected
-    assert {tuple(sorted(r)) for r in records} == {tuple(sorted(records[0]))}  # schema เดียวกัน
-    waze = {r["source_id"]: r for r in records if r["source"] == "waze"}
-    assert waze["1004"]["delay_s"] is None and waze["1004"]["jam_level"] == 5
-    assert waze["1003"]["road_key"] == ""
-    tt = next(r for r in records if r["source"] == "tomtom")
-    assert tt["delay_s"] == 230 and tt["jam_level"] == 3  # TTI 540/310 = 1.74
+    assert {tuple(sorted(r)) for r in records} == {tuple(sorted(sources.RECORD_FIELDS))}
+    by_id = {r["source_id"]: r for r in records}
+    # น้ำท่วมจุดเดียวกันจาก Longdo และ Traffy วันเดียวกัน -> dedup_key เดียวกัน
+    assert by_id["990001"]["dedup_key"] == by_id["2026-AAAA01"]["dedup_key"]
+    assert by_id["990002"]["dedup_key"] != by_id["2026-AAAA02"]["dedup_key"]
 
 
-def test_missing_key_skips_source():
-    with mock.patch.dict(os.environ, {"TOMTOM_API_KEY": ""}):
-        try:
-            sources.extract_tomtom()
-            raise AssertionError("ควร skip")
-        except sources.SourceSkipped:
-            pass
-
-
-def test_robots_disallow_blocks_scraping():
+def test_robots_disallow_blocks():
     def robots_get(url, **kw):
-        r = Resp(None)
-        r.text = "User-agent: *\nDisallow: /live-map/api/"
-        return r
+        return Resp("User-agent: *\nDisallow: /")
     with mock.patch.object(sources.requests, "get", robots_get):
         try:
-            sources.extract_waze()
+            sources.extract_longdo()
             raise AssertionError("ควรถูก robots.txt บล็อก")
         except PermissionError:
             pass
 
 
+def test_layout_change_is_reported():
+    try:
+        sources.parse_tomtom_html("<html>no data</html>")
+        raise AssertionError("ควรแจ้งว่าไม่พบข้อมูล")
+    except ValueError:
+        pass
+
+
 def test_quality_rules_and_branch_decision():
-    bad = {"waze": [{"uuid": 1, "street": "x", "level": 9, "speedKMH": 500, "length": 0, "delay": 1}]}
-    records, rejected = quality.transform(bad)
-    assert not records and "speed_kmh ผิดช่วง" in rejected[0]["problem"]
+    bad = sources.parse_longdo({**LONGDO[2], "latitude": "18.79", "longitude": "98.98"})  # เชียงใหม่
+    assert "นอกกรุงเทพฯ" in quality.row_problems(bad)[0]
+    bad2 = {**sources.parse_tomtom_index({"area": "metro", "road_type": "all", "kind": "base",
+                                          "c": 999, "v": 0, "fv": 50})}
+    assert len(quality.row_problems(bad2)) == 2
     assert quality.evaluate(100, 5)[0] is True
     assert quality.evaluate(100, 80)[0] is False
     assert quality.evaluate(3, 0)[0] is False
