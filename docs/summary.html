@@ -4,110 +4,118 @@
 <meta charset="utf-8">
 <title>สรุปภาพรวมงาน 02739452</title>
 <!--
-  วิธีใช้: แทนที่ภาพใน docs/img/ ด้วยภาพจากเครื่องตัวเอง (graph.png, grid.png, web_main.png, web_status.png)
-  แก้ข้อความใน [วงเล็บเหลี่ยม] แล้วเปิดไฟล์นี้ใน Chrome > Print > Save as PDF (A4, margin Default)
-  ตั้งชื่อไฟล์: ลำดับที่_รหัสนิสิต_summary.pdf
+  วิธีใช้: ใส่ภาพใน docs/img/ (graph.png, grid.png, web_main.png, web_status.png)
+  แล้วเปิดไฟล์นี้ใน Chrome > Ctrl+P > Save as PDF (A4) ตั้งชื่อ 24_6621655274_summary.pdf
 -->
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@350..700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  @page { size: A4; margin: 14mm 14mm 12mm; }
-  body { font-family: "Noto Sans Thai", "Sarabun", sans-serif; color: #223548; font-size: 10.5pt; line-height: 1.5; margin: 0; }
-  h1 { font-size: 17pt; font-weight: 600; color: #000; margin: 0 0 2px; }
-  h2 { font-size: 12.5pt; font-weight: 600; color: #0057d2; margin: 12px 0 4px; border-bottom: 1.5px solid #eaecee; padding-bottom: 2px; }
-  h3 { font-size: 11pt; font-weight: 600; color: #000; margin: 8px 0 2px; }
-  p { margin: 3px 0; }
-  .meta { color: #475e75; font-size: 9.5pt; }
-  .meta b { color: #223548; }
-  table { border-collapse: collapse; width: 100%; font-size: 9.5pt; margin: 4px 0; }
-  th, td { border-bottom: 1px solid #eaecee; padding: 3px 6px; text-align: left; vertical-align: top; }
-  th { background: #f5f6f7; font-weight: 600; }
-  .ok { color: #1a7f37; font-weight: 600; }
-  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 10px; margin-top: 4px; }
-  figure { margin: 0; }
-  figure img { width: 100%; border: 1px solid #eaecee; border-radius: 6px; display: block; }
-  figcaption { font-size: 8.5pt; color: #475e75; text-align: center; margin-top: 1px; }
-  ul, ol { margin: 2px 0 2px 18px; padding: 0; }
-  li { margin: 1px 0; }
-  code { font-size: 9pt; background: #f5f6f7; padding: 0 3px; border-radius: 3px; }
-  .problem { background: #f5f6f7; border-radius: 6px; padding: 5px 10px; margin: 5px 0; break-inside: avoid; }
+  @page { size: A4; margin: 12mm 13mm 11mm; }
+  body { font-family: "IBM Plex Sans Thai", "Noto Sans Thai", "Sarabun", sans-serif; color: #1d2733; font-size: 9.6pt; line-height: 1.5; margin: 0; }
+  h1 { font-size: 15.5pt; font-weight: 700; color: #0b1520; margin: 0 0 2px; }
+  h2 { font-size: 11.5pt; font-weight: 700; color: #00838f; margin: 10px 0 4px; padding-bottom: 2px; border-bottom: 1.5px solid #d9e2e8; }
+  h3 { font-size: 10pt; font-weight: 600; color: #0b1520; margin: 0 0 2px; }
+  p { margin: 2px 0; }
+  .meta { color: #5b6b7a; font-size: 9pt; }
+  .meta b { color: #1d2733; }
+  table { border-collapse: collapse; width: 100%; font-size: 8.8pt; margin: 4px 0; }
+  th, td { border-bottom: 1px solid #e3e9ee; padding: 3px 6px; text-align: left; vertical-align: top; }
+  th { background: #eef4f6; font-weight: 600; }
+  .ok { color: #1a7f37; font-weight: 700; white-space: nowrap; }
+  code { font-family: "JetBrains Mono", Consolas, monospace; font-size: 8pt; background: #eef2f5; padding: 0 3px; border-radius: 3px; }
+  figure { margin: 4px 0 0; break-inside: avoid; }
+  figure img { width: 100%; border: 1px solid #d9e2e8; border-radius: 6px; display: block; }
+  figcaption { font-size: 8pt; color: #5b6b7a; text-align: center; margin-top: 2px; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 10px; }
+  .placeholder { border: 2px dashed #9fb3c2; border-radius: 6px; height: 190px; display: flex; align-items: center;
+                 justify-content: center; color: #5b6b7a; font-size: 9pt; text-align: center; padding: 8px; }
+  .problem { background: #f3f7f9; border-left: 3px solid #00acc1; border-radius: 4px; padding: 5px 9px; margin: 5px 0; break-inside: avoid; }
   .problem p { margin: 1px 0; }
+  ul { margin: 2px 0 2px 16px; padding: 0; }
+  li { margin: 1px 0; }
   .page-break { break-before: page; }
 </style>
 </head>
 <body>
 
 <h1>ระบบรวบรวมข้อมูลความหนาแน่นการจราจรกรุงเทพฯ</h1>
-<p class="meta"><b>ชื่อ</b> [ชื่อ-นามสกุล] · <b>รหัสนิสิต</b> 6621655274 · <b>หมู่</b> [หมู่] · <b>ลำดับที่</b> 24<br>
+<p class="meta"><b>ชื่อ</b> [ชื่อ-นามสกุล] · <b>รหัสนิสิต</b> 6621655274 · <b>หมู่</b> [หมู่] · <b>ลำดับที่</b> 24 ·
 <b>GitHub:</b> https://github.com/Bannawat1/02739452-24-6621655274</p>
 
 <h2>1. ภาพรวมงานแต่ละส่วน</h2>
-<p>ดึงข้อมูลการจราจรของกรุงเทพฯ จาก 3 แหล่งที่<b>ไม่ต้องใช้ API key</b> ทุก 15 นาที รวมเป็นชุดข้อมูลเดียวด้วย Airflow DAG
-เก็บใน PostgreSQL และแสดงผลบนเว็บ Streamlit ที่อ่านจาก PostgreSQL โดยตรง ทุกแหล่งถูกแปลงเป็น schema เดียวกันในตาราง <code>traffic_record</code>
-(<code>source, source_id, record_type, category, title, area, period, event_time, lat, lon, congestion_pct, speed_kmh, severity, dedup_key</code>)</p>
+<p>ระบบดึงข้อมูลการจราจรของกรุงเทพฯ จาก 3 แหล่งที่<b>ไม่ต้องใช้ API key</b> ทุก 15 นาที รวมเป็นชุดข้อมูลเดียวด้วย Apache Airflow DAG
+เก็บใน PostgreSQL และแสดงผลบนเว็บ dashboard (Streamlit) ที่อ่านจาก PostgreSQL โดยตรง ทุกแหล่งถูกแปลงเป็น schema เดียวกันในตาราง
+<code>traffic_record</code> (<code>source, source_id, record_type, category, title, area, period, event_time, lat, lon, congestion_pct, speed_kmh, free_flow_kmh, severity, dedup_key</code>)</p>
 <table>
-  <tr><th>แหล่ง</th><th>วิธีดึง</th><th>ข้อมูลที่ได้</th></tr>
-  <tr><td>TomTom Traffic Index</td><td><b>Web scraping</b> ด้วย requests อ่านข้อมูลที่ฝังใน HTML (ไม่ใช้ Selenium)</td><td>ระดับรถติด (%) ของกรุงเทพฯ รายชั่วโมงทั้งสัปดาห์ 168 ค่า, รายเดือน 12 ค่า, ช่วงเร่งด่วน</td></tr>
-  <tr><td>Longdo Traffic</td><td>JSON feed (ทำตาม Crawl-delay 10 วินาที)</td><td>เหตุการณ์จราจร เช่น น้ำท่วม อุบัติเหตุ (กรองเฉพาะกรุงเทพฯ)</td></tr>
-  <tr><td>Traffy Fondue</td><td>Public API</td><td>เรื่องร้องเรียนด้านถนน จราจร น้ำท่วม ของ กทม.</td></tr>
+  <tr><th style="width:21%">แหล่ง</th><th style="width:37%">วิธีดึง</th><th>ข้อมูลที่ได้</th></tr>
+  <tr><td>TomTom Traffic Index</td><td><b>Web scraping</b> ด้วย requests อ่าน JSON ที่ฝังใน HTML (ไม่ใช้ Selenium)</td><td>ระดับรถติด (%) และความเร็วของกรุงเทพฯ รายชั่วโมงทั้งสัปดาห์ (168 ค่า), รายเดือน, ช่วงเร่งด่วน</td></tr>
+  <tr><td>Longdo Traffic</td><td>JSON feed (ทำตาม <code>Crawl-delay: 10</code>)</td><td>เหตุการณ์จราจร เช่น อุบัติเหตุ น้ำท่วม (กรองเฉพาะกรุงเทพฯ)</td></tr>
+  <tr><td>Traffy Fondue</td><td>Public API</td><td>เรื่องร้องเรียนของ กทม. เฉพาะหมวดจราจร ถนน น้ำท่วม สะพาน</td></tr>
 </table>
-<p class="meta">ทุกแหล่งตรวจ robots.txt ก่อนดึง และไม่เก็บข้อมูลส่วนบุคคล (ตัดชื่อผู้รายงาน ข้อความร้องเรียน และรูปภาพทิ้ง ตาม PDPA)</p>
+<p class="meta">ทุกแหล่งตรวจ robots.txt ด้วย <code>urllib.robotparser</code> ก่อนดึง · PDPA: ไม่เก็บชื่อผู้รายงาน ข้อความร้องเรียน และรูปภาพ</p>
 <table>
-  <tr><th style="width:16%">ระดับ</th><th>สิ่งที่ทำได้</th><th style="width:9%">ผล</th></tr>
+  <tr><th style="width:13%">ระดับ</th><th>สิ่งที่ทำได้</th><th style="width:7%">ผล</th></tr>
   <tr><td>1 ขั้นต่ำ</td><td>DAG extract → transform → load → PostgreSQL → เว็บแสดงตารางและกราฟ</td><td class="ok">ครบ</td></tr>
-  <tr><td>2 มาตรฐาน</td><td>3 แหล่งรันขนานใน TaskGroup <code>extract</code>, schema เดียวกัน, UPSERT <code>ON CONFLICT (source, source_id)</code> (Clear แล้วรันซ้ำ log ขึ้น "ใหม่ 0"), เว็บมี KPI 5 ตัว และตัวกรอง (แหล่ง, ช่วงวัน, ประเภท, คำค้น)</td><td class="ok">ครบ</td></tr>
-  <tr><td>3 ท้าทาย</td><td>แหล่งล่ม → task failed แต่ <code>transform</code> ใช้ <code>trigger_rule="all_done"</code> จึงรวมจากแหล่งที่เหลือได้ (สถานะ PARTIAL);
-    ตัดรายการซ้ำข้ามแหล่ง: เหตุการณ์จาก Longdo และ Traffy ที่อยู่กลุ่มเดียวกัน วันเดียวกัน ห่างกันไม่เกิน ~300 ม. รวมเหลือ 1 แถวในตาราง <code>traffic_event</code>;
-    ตรวจคุณภาพ (ค่าว่าง, ช่วงค่า, พิกัดต้องอยู่ในกรุงเทพฯ, เวลาไม่อยู่ในอนาคต) แล้ว <code>@task.branch</code> ไป <code>load</code> หรือ <code>quarantine</code></td><td class="ok">ครบ</td></tr>
-  <tr><td>โบนัส</td><td>หน้า "Pipeline Status" บนเว็บ: สถานะแต่ละแหล่ง ประวัติการรัน และแถวที่ไม่ผ่านการตรวจ</td><td class="ok">ครบ</td></tr>
+  <tr><td>2 มาตรฐาน</td><td>3 แหล่งรันขนานใน TaskGroup <code>extract</code> · รวมเป็น schema เดียว · UPSERT <code>ON CONFLICT (source, source_id)</code>
+    (Clear แล้วรันซ้ำ log ขึ้น "ใหม่ 0") · เว็บมี KPI 3 ตัวและตัวกรอง (ขอบเขต TomTom, วัน, แหล่ง, ช่วงวัน, ประเภท, คำค้น)</td><td class="ok">ครบ</td></tr>
+  <tr><td>3 ท้าทาย</td><td><b>แหล่งล่ม:</b> <code>transform</code> ใช้ <code>trigger_rule="all_done"</code> รวมจากแหล่งที่เหลือได้ (สถานะ PARTIAL) ·
+    <b>ตัดรายการซ้ำข้ามแหล่ง:</b> เหตุการณ์ Longdo/Traffy กลุ่มเดียวกัน วันเดียวกัน ห่างกัน ≤ ~300 ม. รวมเหลือ 1 แถวในตาราง <code>traffic_event</code> ·
+    <b>ตรวจคุณภาพแล้วแตกเส้นทาง:</b> ค่าว่าง ช่วงค่า พิกัดต้องอยู่ในกรุงเทพฯ เวลาไม่อยู่ในอนาคต แล้ว <code>@task.branch</code> ไป <code>load</code> หรือ <code>quarantine</code></td><td class="ok">ครบ</td></tr>
+  <tr><td>โบนัส</td><td>หน้า "Pipeline Status" บนเว็บ แสดงสถานะแต่ละแหล่ง ประวัติการรัน และแถวที่ไม่ผ่านการตรวจ</td><td class="ok">ครบ</td></tr>
 </table>
-<p>ข้อมูลสะสม: <b>[จำนวน]</b> รายการ (ตรวจด้วย <code>SELECT COUNT(*) FROM traffic_record</code>)</p>
+<p>ข้อมูลสะสม: <b>[จำนวน]</b> รายการ (เกณฑ์ ≥ 100) · ทุกรอบที่รันบนเครื่องผู้จัดทำ ทั้ง 3 แหล่งเป็น success (ภาพที่ 1–2)</p>
+<figure><img src="img/graph.png"><figcaption>ภาพที่ 1 Graph view: TaskGroup extract รัน 3 แหล่งขนาน → transform → quality_check (branch) → load (upsert → dedupe) / quarantine → record_run</figcaption></figure>
 
-<div class="grid">
-  <figure><img src="img/graph.png"><figcaption>ภาพที่ 1 Graph view ของ DAG bkk_traffic_pipeline</figcaption></figure>
-  <figure><img src="img/grid.png"><figcaption>ภาพที่ 2 Grid view แสดงรอบที่สำเร็จ แหล่งที่ล่ม และ branch</figcaption></figure>
-  <figure><img src="img/web_main.png"><figcaption>ภาพที่ 3 เว็บ dashboard: KPI ตัวกรอง และระดับรถติดรายชั่วโมง</figcaption></figure>
-  <figure><img src="img/web_status.png"><figcaption>ภาพที่ 4 หน้า Pipeline Status (โบนัส)</figcaption></figure>
+<div class="page-break"></div>
+<figure><img src="img/grid.png"><figcaption>ภาพที่ 2 Grid view: ทุก task รวมทั้ง 3 แหล่งสำเร็จทุกรอบ ส่วน quarantine ถูก skip เพราะข้อมูลผ่านการตรวจคุณภาพ</figcaption></figure>
+<div class="grid2">
+  <figure>[[WEB_MAIN]]<figcaption>ภาพที่ 3 Dashboard: KPI, heatmap ความหนาแน่นรายชั่วโมง และเหตุการณ์ล่าสุด</figcaption></figure>
+  <figure>[[WEB_STATUS]]<figcaption>ภาพที่ 4 หน้า Pipeline Status (โบนัส)</figcaption></figure>
 </div>
 
-<h2 class="page-break">2. ปัญหาที่พบและวิธีแก้</h2>
+<h2>2. ปัญหาที่พบและวิธีแก้</h2>
 <div class="problem">
   <h3>ปัญหา 1: แหล่งข้อมูลที่วางแผนไว้ (Waze Live Map) ดึงไม่ได้ และ robots.txt ไม่อนุญาต</h3>
-  <p><b>อาการ:</b> task <code>extract.waze</code> ล้มเหลว ได้ HTTP 403 Forbidden</p>
-  <p><b>วิธีหาสาเหตุ:</b> เขียนสคริปต์ PowerShell ทดสอบทุก URL ที่วางแผนไว้ พร้อมอ่าน robots.txt ของแต่ละเว็บ พบว่า Waze มี
-     <code>Disallow: /live-map/api</code> จึงใช้ไม่ได้ตามข้อกำหนด ส่วน TomTom/HERE API ต้องใช้ key ซึ่งอาจารย์ที่รันจาก repo จะไม่มี</p>
-  <p><b>วิธีแก้:</b> ทดสอบหาแหล่งที่ไม่ต้องใช้ key และ robots.txt อนุญาต ได้ TomTom Traffic Index (scrape จาก HTML), Longdo event feed
-     และ Traffy Fondue API จากนั้นเขียนตัวดึงใหม่โดยใช้ตัวอย่างข้อมูลจริงจากการทดสอบมาเขียน unit test</p>
+  <p><b>อาการ:</b> task <code>extract.waze</code> ล้มเหลวด้วย HTTP 403 Forbidden</p>
+  <p><b>วิธีหาสาเหตุ:</b> เขียนสคริปต์ PowerShell ทดสอบทุก URL ที่วางแผนไว้พร้อมอ่าน robots.txt พบว่า Waze มี <code>Disallow: /live-map/api</code>
+     ส่วน TomTom/HERE Routing API ต้องใช้ key ซึ่งห้าม commit ทำให้อาจารย์รันจาก repo แล้วจะไม่ได้ข้อมูล</p>
+  <p><b>วิธีแก้:</b> ทดสอบหาแหล่งที่ไม่ต้องใช้ key และ robots.txt อนุญาต ได้ TomTom Traffic Index (scrape HTML), Longdo feed และ Traffy API
+     แล้วนำตัวอย่างข้อมูลจริงจากการทดสอบมาเขียน unit test ก่อนแก้โค้ด</p>
 </div>
 <div class="problem">
-  <h3>ปัญหา 2: Docker Desktop เปิดไม่ขึ้น ค้างที่ "Starting the Docker Engine..."</h3>
-  <p><b>อาการ:</b> สั่ง <code>docker compose up</code> แล้วขึ้น <code>Docker Desktop is unable to start</code></p>
-  <p><b>วิธีหาสาเหตุ:</b> สั่ง <code>wsl -l -v</code> เพื่อดูว่า WSL 2 ทำงานได้ และเช็ก Virtualization ใน Task Manager [ระบุผลที่เจอ]</p>
-  <p><b>วิธีแก้:</b> <code>wsl --update</code>, <code>wsl --shutdown</code> แล้ว[ระบุวิธีที่ใช้ได้จริง เช่น อัปเดต Docker Desktop / Reset to factory defaults / รีสตาร์ตเครื่อง]</p>
+  <h3>ปัญหา 2: heatmap บนเว็บขึ้น <code>ValueError: Index contains duplicate entries, cannot reshape</code></h3>
+  <p><b>อาการ:</b> ตอนทดสอบด้วยข้อมูลตัวอย่างแสดงผลได้ แต่พอใช้ข้อมูลจริงกราฟ "รถติดช่วงไหนของสัปดาห์" พัง</p>
+  <p><b>วิธีหาสาเหตุ:</b> traceback ชี้ไปที่ <code>DataFrame.pivot()</code> จึง query ข้อมูลดู พบว่าหน้า TomTom จริงมีข้อมูลหลายขอบเขต (เช่น metro/city)
+     ทำให้วัน/ชั่วโมงเดียวกันมีหลายค่า ซึ่งข้อมูลตัวอย่างมีขอบเขตเดียวจึงไม่เจอ</p>
+  <p><b>วิธีแก้:</b> แยกขอบเขตจาก <code>source_id</code> แล้วเพิ่มตัวเลือก "ขอบเขตข้อมูล TomTom" ให้กรองก่อนวาด และเปลี่ยนเป็น <code>pivot_table</code></p>
 </div>
 <div class="problem">
-  <h3>ปัญหา 3: แผนที่บน dashboard ขึ้นข้อความ "Error fetching Streamlit Mapbox token"</h3>
-  <p><b>อาการ:</b> ส่วนอื่นของหน้าเว็บแสดงได้ปกติ แต่แผนที่ <code>st.pydeck_chart</code> ไม่ขึ้น</p>
-  <p><b>วิธีหาสาเหตุ:</b> จากข้อความ error พบว่า pydeck ใน Streamlit ต้องดึง Mapbox token ก่อนวาดแผนที่</p>
-  <p><b>วิธีแก้:</b> เปลี่ยนไปใช้ <code>plotly.express.scatter_mapbox</code> กับสไตล์ <code>carto-positron</code> ซึ่งไม่ต้องใช้ token</p>
+  <h3>ปัญหา 3: แผนที่บน dashboard ขึ้นลายน้ำ "API KEY REQUIRED"</h3>
+  <p><b>อาการ:</b> จุดเหตุการณ์แสดงได้ แต่พื้นแผนที่เป็นลายน้ำ <code>carto.com/basemaps/apikey</code></p>
+  <p><b>วิธีหาสาเหตุ:</b> สไตล์ <code>carto-positron</code> ของ plotly ดึงภาพจาก CARTO ซึ่งเปลี่ยนนโยบายให้ต้องใช้ API key แล้ว
+     ยืนยันโดยดักดู request ของเบราว์เซอร์ว่าภาพแผนที่โหลดจาก host ไหน</p>
+  <p><b>วิธีแก้:</b> กำหนดแหล่งภาพแผนที่เป็น OpenStreetMap (<code>tile.openstreetmap.org</code>) ผ่าน <code>mapbox_layers</code> ซึ่งไม่ต้องใช้ key</p>
+</div>
+<div class="problem">
+  <h3>ปัญหา 4: ข้อมูล Traffy มีเรื่องที่ไม่เกี่ยวกับการจราจรปนมา (เช่น เรื่องขยะ)</h3>
+  <p><b>อาการ / สาเหตุ:</b> เมื่อเรื่องไม่มีประเภท ระบบกรองด้วยคำว่า "ถนน" ในข้อความ แต่ข้อความของ Traffy มีบรรทัด <code>ถนน: &lt;ชื่อถนน&gt;</code> ระบุที่อยู่แทบทุกเรื่อง</p>
+  <p><b>วิธีแก้:</b> เลิกใช้คำว่า "ถนน" ใช้เฉพาะ "รถติด/การจราจร/น้ำท่วม" และเพิ่มข้อมูลจริงที่มีบรรทัดนี้ลง unit test กันไม่ให้บั๊กกลับมา</p>
 </div>
 
 <h2>3. การวางแผนและจัดลำดับงาน</h2>
 <table>
-  <tr><th style="width:20%">เวลา</th><th>งาน</th><th style="width:30%">เหตุผล</th></tr>
-  <tr><td>13:00–13:20</td><td>เลือกหัวข้อและแหล่งข้อมูล ออกแบบ schema กลาง</td><td>schema กลางต้องนิ่งก่อน งานส่วนอื่นจึงจะเดินได้</td></tr>
-  <tr><td>13:20–14:00</td><td>docker-compose (Airflow + PostgreSQL), DAG ครบ E-T-L และหน้าเว็บตาราง + กราฟ</td><td>เก็บคะแนนระดับ 1 ก่อน</td></tr>
-  <tr><td>14:00–14:40</td><td>TaskGroup 3 แหล่ง, UPSERT, KPI และตัวกรอง, all_done, dedupe, branch, หน้าสถานะ</td><td>ระดับ 2–3 และโบนัส ต่อยอดจากโครงเดิม</td></tr>
-  <tr><td>14:40–15:20</td><td>ทดสอบแหล่งจริงบนเครื่อง พบว่า Waze ใช้ไม่ได้ จึงหาแหล่งใหม่และแก้โค้ด, แก้ปัญหา Docker</td><td>อาจารย์จะรันจาก repo ต้องรันได้จริงโดยไม่ต้องใช้ key</td></tr>
-  <tr><td>15:20–15:45</td><td>รันจริง เก็บข้อมูลให้เกิน 100 รายการ ทดสอบ Clear/แหล่งล่ม จับภาพหน้าจอ</td><td>ภาพใน PDF ต้องตรงกับที่อาจารย์รันได้</td></tr>
-  <tr><td>15:45–16:00</td><td>README, ตรวจว่าไม่มี key ใน repo, push, ทำ PDF</td><td>นับเฉพาะ commit ก่อน 16:00</td></tr>
+  <tr><th style="width:15%">ช่วง</th><th>งาน</th><th style="width:33%">เหตุผล</th></tr>
+  <tr><td>1 (20 นาที)</td><td>เลือกหัวข้อ ออกแบบ schema กลางและโครง DAG</td><td>schema ต้องนิ่งก่อน งานส่วนอื่นจึงจะทำต่อได้</td></tr>
+  <tr><td>2 (40 นาที)</td><td>docker-compose (Airflow + PostgreSQL), DAG ครบ E-T-L, เว็บตาราง + กราฟ</td><td>เก็บคะแนนระดับ 1 ให้ได้ก่อน</td></tr>
+  <tr><td>3 (40 นาที)</td><td>TaskGroup 3 แหล่ง, UPSERT, KPI/ตัวกรอง, all_done, dedupe, branch, หน้าสถานะ</td><td>ระดับ 2–3 และโบนัสต่อยอดจากโครงเดิมได้</td></tr>
+  <tr><td>4 (40 นาที)</td><td>ทดสอบแหล่งจริงบนเครื่อง พบว่า Waze ใช้ไม่ได้ จึงหาแหล่งใหม่ แก้บั๊กหน้าเว็บ</td><td>อาจารย์รันจาก repo ต้องรันได้จริงโดยไม่ต้องใช้ key</td></tr>
+  <tr><td>5 (20 นาที)</td><td>รันเก็บข้อมูลให้เกิน 100 รายการ จับภาพ ทำ README และ PDF แล้ว push</td><td>นับเฉพาะ commit ก่อน 16:00 จึงเผื่อเวลาไว้</td></tr>
 </table>
-<p class="meta">[ปรับเวลาให้ตรงกับที่ทำจริง]</p>
-<h3>งานที่ตัดออกและเหตุผล</h3>
+<p><b>งานที่ตัดออก:</b></p>
 <ul>
-  <li><b>Waze Live Map:</b> robots.txt ไม่อนุญาต (<code>Disallow: /live-map/api</code>) และตอบ 403 จึงตัดออกตามข้อกำหนด</li>
-  <li><b>TomTom / HERE Routing API:</b> ต้องใช้ API key ซึ่งห้าม commit ทำให้อาจารย์รันจาก repo แล้วไม่ได้ข้อมูล จึงเลือกแหล่งที่ไม่ต้องใช้ key แทน</li>
-  <li><b>Dynamic Task Mapping:</b> โบนัสได้คะแนนเท่ากับหน้าสถานะ pipeline ซึ่งยังช่วยดูว่าแหล่งไหนล่มด้วย จึงเลือกทำหน้าสถานะ</li>
-  <li><b>ข้อความและรูปของเรื่องร้องเรียน Traffy:</b> อาจมีชื่อหรือเบอร์โทรของผู้แจ้ง ขัดกับ PDPA จึงเก็บเฉพาะประเภท พิกัด เวลา และเขต</li>
+  <li><b>Waze Live Map:</b> robots.txt ไม่อนุญาตและตอบ 403 จึงตัดตามข้อกำหนด</li>
+  <li><b>TomTom / HERE Routing API:</b> ต้องใช้ key ซึ่งห้าม commit อาจารย์จึงรันแล้วไม่ได้ข้อมูล</li>
+  <li><b>Dynamic Task Mapping:</b> โบนัสได้คะแนนเท่ากับหน้าสถานะ pipeline ซึ่งช่วยดูได้ด้วยว่าแหล่งไหนล่ม จึงเลือกทำหน้าสถานะ</li>
+  <li><b>ข้อความ/รูปของเรื่องร้องเรียน:</b> อาจมีชื่อหรือเบอร์โทรผู้แจ้ง ขัดกับ PDPA จึงเก็บเฉพาะประเภท พิกัด เวลา และเขต</li>
 </ul>
 
 </body>
